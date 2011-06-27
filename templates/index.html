@@ -1,0 +1,149 @@
+<html>
+  <head>
+
+    <title>Market Trend</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/web_client.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/colors.css"/>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="/static/js/ui/testresize.js"></script>
+    <script src="/static/js/ticktest.js"></script>
+    <script src="/static/js/tickp.js"></script>
+    <script src="/static/js/stats.js"></script>
+
+  </head>
+  <body>
+    <div id="container">
+      <div id="controls">
+	<div id="controls2">
+	  <div class="group2">
+
+	    <div class="node">SYMBOLS</div>
+
+	    {% for s in symbols %}
+	    <div class="log_file">
+	      <div class="status"></div>
+	      <div class="label">{{s}}</div>
+	      <div class="screens">
+		<input type="radio" class="stream">
+	      </div>
+	    </div>
+	    {% end %}
+
+	  </div>
+	</div>
+      </div><!-- #controls -->
+
+      <div id="right">
+
+
+	<div id="screens">
+
+	  <div class="screen">
+	    <div class="bar">
+	      <span class="screen-label topchart">Chart</span>
+	      <div class="bar-top-right">
+		<div class="screen-buttons">
+		</div>
+	      </div>	      
+	    </div>
+	    <div class="console">
+
+	      <div id="chart">
+	      </div>
+
+	    </div>
+	  </div>
+
+	  <div class="screen history">
+	    <div class="bar">
+	      <span class="screen-label">Messages</span>
+	      <div class="bar-top-right">
+		<div class="screen-buttons">
+		</div>
+	      </div>	      
+	    </div>
+	    <div class="console">
+	      <div class="websocket">
+		{% for h in dbtrends %}
+		<p>
+		  <span class="label labelcolor1">{{h['date']}} {{h['symbol']}}</span> <span class="trend" id="{{h['uuid']}}">{{h['trendtype']}} trend discovered</span>
+		</p>
+		{% end %}
+		<p>
+		  <span class="label labelcolor1">Connected to server... </span>
+		</p>
+	      </div>
+	    </div>
+	  </div>
+	
+	</div>
+	<div id="bottom">
+	  <div id="bottom2">
+	    <div id="stats">
+	      <div class="stat nodes"><b>0</b> nodes</div>
+	      <div class="stat log_files"><b>0</b> log files</div>
+	      <div class="stat messages"><b>0</b> messages</div>
+	      <div class="stat elapsed"><b>0:00</b> elapsed</div>
+	      <div class="stat rate"><b>0.00</b> messages/sec</div>
+	    </div>
+	    <div class="add-buttons">
+	      <div class="add-button" id="start-simulation">+ Start Simulation</div>
+	      <div class="add-button" id="pause-simulation">- Pause Simulation</div>
+	    </div>
+	  </div>
+	</div><!-- #bottom -->
+      </div>
+      
+      <div id="templates">
+	<div class="group" id="node_template">
+	  <div class="group2">
+	    <div class="node">
+	    </div>
+	  </div>
+	</div><!-- #node_template -->
+	
+	<div class="log_file" id="log_file_template">
+	  <div class="status"></div>
+	  <div class="label"></div>
+	  <div class="screens">
+	  </div>
+	</div><!-- #log_file_template -->
+	
+	<div class="screen stream" id="stream_template">
+	  <div class="bar">
+	    <span class="screen-label"></span>
+	    
+	    <div class="bar-top-right">
+	      <div class="screen-buttons">
+		<a class="button close" href="#"><img src="/static/images/icons/cross.png" title="Close Screen"/></a>
+		<a class="button clear" href="#"><img src="/static/images/icons/bin.png" title="Clear Screen"/></a>
+		<a class="button pause" href="#"><img src="/static/images/icons/control_pause.png" title="Pause Stream"/></a>
+		<a class="button start" href="#"><img src="/static/images/icons/control_play.png" title="Start Stream"/></a>
+	      </div>
+	      <div class="screen-search"><a href="#" class="result-count"></a><input type="text" class="inactive" name="search" title="Regex Search" value="Regex Search"/></div>
+	    </div>
+	  </div>
+
+	  <div class="console">
+	  </div>
+	</div><!-- #stream_template -->
+
+	<div class="screen history" id="history_template">
+	  <div class="bar">
+	    <span class="screen-label"></span>
+	    <div class="bar-top-right">
+	      <div class="screen-buttons">
+		<a class="button close" href="#"><img src="/static/images/icons/cross.png" title="Close Screen"/></a>
+	      </div>
+	      <div class="screen-search"><a href="#" class="result-count"></a><input type="text" class="inactive" name="search" title="Regex Search" value="Regex Search"/></div>
+	    </div>
+	  </div>
+	  <div class="console">
+	  </div>
+	</div><!-- #history_template -->
+	
+      </div><!-- #templates -->
+      
+  </body>
+</html>

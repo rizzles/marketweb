@@ -1,0 +1,3 @@
+This is the tornado based web page interface to the market trend finder.
+
+Websocket real time updates from rabbitmq/pika.
