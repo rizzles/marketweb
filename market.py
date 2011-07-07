@@ -17,8 +17,6 @@ import tornado.websocket
 from pika.adapters.tornado_connection import TornadoConnection
 import pika
 
-from bson.objectid import ObjectId
-
 from htmlentitydefs import codepoint2name
 
 from variables import *
@@ -130,7 +128,11 @@ class MainHandler(BaseHandler):
         dbtrends = []
 
         for t in ticks:
-            symbols.append(t['Tables_in_market'])
+            if t['Tables_in_market'] == 'trends':
+                pass
+            else:
+                symbols.append(t['Tables_in_market'])
+
         for trend in trends:
             temp = {}
             date = datetime.fromtimestamp(int(trend['created']))
@@ -140,7 +142,7 @@ class MainHandler(BaseHandler):
             temp['symbol'] = trend['symbol']
             temp['trendtype'] = trend['type']
             temp['uuid'] = trend['uuid']
-
+            
             dbtrends.append(temp)
 
         self.render("index.html", symbols=symbols, dbtrends=dbtrends)
