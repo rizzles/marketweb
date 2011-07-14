@@ -73,7 +73,7 @@ class PikaClient(object):
             date = datetime.now()
             date = date-timedelta(hours=5)
             date = date.strftime("%Y-%m-%d %I:%M:%S")
-            html = uuid +"|<p><span class='label labelcolor1'>"+date+" "+symbol+" </span><span class='trend' id='"+uuid+"'>%s trend discovered</span></p>"% trend['type']
+            html = uuid +"|<p><span class='label labelcolor1'>"+date+" "+symbol+" </span><span class='trend' id='"+uuid+"'>%s trend discovered</span><a href='/full/?uuid=%s' target='_blank'><img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:5px'></a></p>"% (trend['type'], uuid)
             listener.write_message(html)
 
     def on_closed(self, connection):
@@ -96,6 +96,7 @@ class Application(tornado.web.Application):
             (r"/", MainHandler),
             (r"/feed/", FeedHandler),
             (r"/trend/", TrendHandler),
+            (r"/full/", FullHandler),
 
             (r"/ws/", EchoWebSocket),
             (r"/pika/", PikaSocket),
@@ -241,6 +242,13 @@ class TrendHandler(BaseHandler):
                 }
 
         self.write(tornado.escape.json_encode(data))
+
+
+class FullHandler(BaseHandler):
+    def get(self):
+        uuid = self.get_argument("uuid", None)
+
+        self.render('full.html', uuid=uuid)
 
 
 class FeedHandler(BaseHandler):
