@@ -124,7 +124,7 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     def get(self):
         ticks = db.query("SHOW TABLES")
-        trends = db.query("SELECT * FROM trends ORDER BY created desc LIMIT 50")
+        trends = db.query("SELECT * FROM trends ORDER BY created desc LIMIT 200")
         symbols = []
         dbtrends = []
 
