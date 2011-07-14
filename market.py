@@ -165,34 +165,78 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 class TrendHandler(BaseHandler):
     def get(self):
         uuid = self.get_argument("uuid", None)
-
         trend = db.get("""SELECT * FROM trends WHERE uuid = %s""", uuid)
-        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date <= %s and date >= %s order by date"""% (trend['symbol'], trend['date'], int(trend['date'])-100))
+        
+        # zoomed in version
+        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date <= %s and date >= %s order by date"""% (trend['symbol'], int(trend['date'])+30, int(trend['date'])-100))
+        #ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['date'])-100))
+
+        p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
+        p2 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p2']))
+        p3 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p3']))
+        p4 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p4']))
+        p5 = None
+        if trend['p5']:
+            p5 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p5']))            
 
         hold = []
+        count = 0
         for tick in ticks:
+            if tick['date'] == p1['date']:
+                p1['date'] = count
+            if tick['date'] == p2['date']:
+                p2['date'] = count
+            if tick['date'] == p3['date']:
+                p3['date'] = count
+            if tick['date'] == p4['date']:
+                p4['date'] = count
+            if p5 and tick['date'] == p5['date']:
+                p5['date'] = count
             tick['date'] = datetime.fromordinal(int(tick['date']))
-            tick['date'] = tick['date'].strftime("%Y-%m-%d %I:%M:%S")                        
+            tick['date'] = tick['date'].strftime("%Y-%m-%d %I:%M:%S")
             hold.append([tick['date'], tick['open'], tick['high'], tick['low'], tick['close']])
-
-        lines = []
-        line = []
-        line.append(25)
-        line.append(trend['p1'])
-
-        lines.append(line)
+            count += 1
 
         line = []
-        line.append(25)
-        line.append(trend['p2'])
+        points = []
+        if trend['type'] == 'Upward Triangle':
+            line.append([p2['date'], p2['low'], p4['date'], p4['low']])
+            line.append([p1['date'], p1['high'], p3['date'], p3['high']])
+            points.append([p1['date']-0.1, p1['high']+0.3, p1['date']-0.5, p1['high']+2])
+            points.append([p2['date']-0.1, p2['low']-0.3, p2['date']-0.5, p2['low']-2])
+            points.append([p3['date']-0.1, p3['high']+0.3, p3['date']-0.5, p3['high']+2])
+            points.append([p4['date']-0.1, p4['low']-0.3, p4['date']-0.5, p4['low']-2])
 
-        lines.append(line)
+        if trend['type'] == 'Downward Triangle':
+            line.append([p2['date'], p2['high'], p4['date'], p4['high']])
+            line.append([p1['date'], p1['low'], p3['date'], p3['low']])
+            points.append([p1['date']-0.1, p1['low']-0.3, p1['date']-0.5, p1['low']-2])
+            points.append([p2['date']-0.1, p2['high']+0.3, p2['date']-0.5, p2['high']+2])
+            points.append([p3['date']-0.1, p3['low']-0.3, p3['date']-0.5, p3['low']-2])
+            points.append([p4['date']-0.1, p4['high']+0.3, p4['date']-0.5, p4['high']+2])
+
+        if trend['type'] == 'Upward Head and Shoulders':
+            line.append([p2['date'], p2['low'], p4['date'], p4['low']])
+            points.append([p1['date']-0.1, p1['high']+0.3, p1['date']-0.5, p1['high']+2])
+            points.append([p2['date']-0.1, p2['low']-0.3, p2['date']-0.5, p2['low']-2])
+            points.append([p3['date']-0.1, p3['high']+0.3, p3['date']-0.5, p3['high']+2])
+            points.append([p4['date']-0.1, p4['low']-0.3, p4['date']-0.5, p4['low']-2])
+            points.append([p5['date']-0.1, p5['high']+0.3, p5['date']-0.5, p5['high']+2])
+
+        if trend['type'] == 'Downward Head and Shoulders':
+            line.append([p2['date'], p2['high'], p4['date'], p4['high']])
+            points.append([p1['date']-0.1, p1['low']-0.3, p1['date']-0.5, p1['low']-2])
+            points.append([p2['date']-0.1, p2['high']+0.3, p2['date']-0.5, p2['high']+2])
+            points.append([p3['date']-0.1, p3['low']-0.3, p3['date']-0.5, p3['low']-2])
+            points.append([p4['date']-0.1, p4['high']+0.3, p4['date']-0.5, p4['high']+2])
+            points.append([p5['date']-0.1, p5['low']-0.3, p5['date']-0.5, p5['low']-2])
 
         data = {'trend': 
                 {"label" : trend['symbol'],
                 "data" : hold},
 
-                'lines': lines,
+                'lines': line,
+                'points': points,
                 'trendtype': trend['type']
                 }
 

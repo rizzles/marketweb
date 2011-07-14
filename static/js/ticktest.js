@@ -26,10 +26,11 @@ $(document).ready(function() {
 			        if(!r) { 
 				  return;
 			    } 
-			    //plot.plot();
 
-			    //plot.lines = data['lines'];
-			    //plot.drawlines()
+				plot.lines = data['lines'];
+				plot.points = data['points'];
+				plot.drawtrendlines();
+				plot.drawpoints();
 			}
 		    });
 	}

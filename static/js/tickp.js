@@ -101,19 +101,83 @@
             return this;
         },
 
+	drawpoints: function() {
+	    var points = this.points;
+
+	    
+
+	},
+
+        drawtrendlines: function() {
+            var lines = this.lines;
+	    var points = this.points;
+
+            var cs = this.cs;
+            var cp = this.cp;
+	    var overlays = {};
+	    var indicators = [];
+	    var shift = 0;
+	    
+	    var ob = this._window(this.current.ohlc, overlays, shift); 
+            var xmin = ob.xmin, ymin = ob.ymin, xmax = ob.xmax, ymax = ob.ymax;
+
+            var range = ymax - ymin;
+            var scale = this.plotht/range; // scale: how much a unit takes on the plot
+
+	    var _log = (cp.logscale ? Math.log : function(x) {return x});
+            var csize = Math.round(cp.cwidth/1.6);
+
+            var c = Math.round(cp.cwidth/2); // center of first (and every) candlestick
+
+            var _top = this.topmargin, _left = this.loffset, _right = _left + this.plotwidth, _bottom = _top + this.plotht;
+            var h = _bottom;
+
+	    for (var i in lines) {
+		// vertical = negative from top
+		var y1 = Math.round((_log(lines[i][1])-cp.ymin)*scale);
+		var y2 = Math.round((_log(lines[i][3])-cp.ymin)*scale);
+
+		// horizontal = date
+		// xlo finds left edge of candlestick
+		var xlo1 = (c + (lines[i][0]-xmin)*cp.cwidth) - csize + this.loffset;
+		// xline should find middle of candlestick
+		var xline1 = xlo1 + Math.round(csize/2);
+
+		var xlo2 = (c + (lines[i][2]-xmin)*cp.cwidth) - csize + this.loffset;
+		var xline2 = xlo2 + Math.round(csize/2);
+
+		angle = Math.atan2(y2-y1, xline1-xline2);
+
+		//_drawline(this.ctx, xline1, h-y1, xline2, h-y2, '#fff', 2);
+		_drawline(this.ctx, xline1, h-y1, xline2+500*Math.cos(angle-Math.PI), (h-y2)+500*Math.sin(angle-Math.PI), '#fff', 2);
+	    }
+	    for (var i in points) {
+		var y1 = Math.round((_log(points[i][1])-cp.ymin)*scale);
+		var y2 = Math.round((_log(points[i][3])-cp.ymin)*scale);
+
+		// horizontal = date
+		// xlo finds left edge of candlestick
+		var xlo1 = (c + (points[i][0]-xmin)*cp.cwidth) - csize + this.loffset;
+		var xlo2 = (c + (points[i][2]-xmin)*cp.cwidth) - csize + this.loffset;
+		// xline should find middle of candlestick
+		var xline1 = xlo1 + Math.round(csize/2);
+		var xline2 = xlo2 + Math.round(csize/2);
+
+		_drawarrow(this.ctx, xline2, h-y2, xline1, h-y1, '#fff', 2);
+	    }
+        },
+
         drawlines: function() {
             this.octx.clearRect(0,0, this.width, this.height);
             this.octx.strokeStyle = plot.cs.stroke;
-	    this.octx.strokeStyle = "#eee";
             var lines = this.lines; 
-
             for(var i = 0; i < lines.length; i++) { 
-		this.octx.beginPath();
-		this.octx.moveTo(lines[i][0][0], lines[i][0][1]);
+                this.octx.beginPath();
+                this.octx.moveTo(lines[i][0][0], lines[i][0][1]);
                 this.octx.lineTo(lines[i][1][0], lines[i][1][1]);
                 this.octx.stroke();
             } 
-        }, 
+        },
  
         _initPlotCanvas: function() {
             // First determine the width and height. width won't change
@@ -336,7 +400,7 @@
         plotempty: function() { 
             this.cp = { numindicators : 0};
             this._initPlotCanvas();
-            //this._drawText("Loading....", 100, 100, {font: '20pt Arial'});
+            //this._drawText("Loading....", 100, 100, {font: '20pt Verdana'});
         
         }, 
         /* low level plot function. Should not be used directly. */
@@ -377,6 +441,7 @@
             // appear than doing it for entire data. 
             var _log = (cp.logscale ? Math.log : function(x) {return x});
             var _exp = (cp.logscale ? Math.exp : function(x) {return x}); 
+
             var c = Math.round(cp.cwidth/2); // center of first (and every) cdl 
             var csize = Math.round(cp.cwidth/1.6);
 
@@ -393,10 +458,10 @@
             ctx.strokeStyle = this.cs.stroke;
             ctx.strokeRect(vl, vt, this.plotwidth, this.liplotht + this.limargin);
 
-
             var range = ymax - ymin;
             var scale = this.plotht/range; // scale: how much a unit takes on the plot
             var prevxy = []; // used for drawing line to last point
+
             for(var i = xmin; i < xmax; i++) { 
                 var yop = Math.round((_log(data[i][0])-cp.ymin)*scale);
                 var yhi = Math.round((_log(data[i][1])-cp.ymin)*scale);
@@ -524,9 +589,9 @@
 
             /* And now let's give it a label. */
             if (this.cp.label) { 
-                //this._drawText("VOLUME", vl, vt+20, {align:'left', padding:5, font:'10pt Arial'});
-                //this._drawText(this.cp.label, this.loffset - 2, 24, {align:'left', font:'16pt Arial'});
-                //this._drawText(this.copyrighttext, this.width - 60, 24, {align:'right', padding:5, font:'12pt Arial'});
+                //this._drawText("VOLUME", vl, vt+20, {align:'left', padding:5, font:'10pt Verdana'});
+                //this._drawText(this.cp.label, this.loffset - 2, 24, {align:'left', font:'16pt Verdana'});
+                //this._drawText(this.copyrighttext, this.width - 60, 24, {align:'right', padding:5, font:'12pt Verdana'});
                 var ol = this.cs.overlays;
                 for (var i in overlays) {
                     if (overlays[i].offset !== undefined) {
@@ -1021,7 +1086,7 @@
             default:
                 break;
             }
-            this._drawText(str, l, t+20, {align:'left', padding:5, font:'10pt Arial'});
+            this._drawText(str, l, t+20, {align:'left', padding:5, font:'10pt Verdana'});
             
         },
 
@@ -1114,7 +1179,7 @@
             var cs = this.cs;
             var ctx = this.ctx;
             var color = style.color || cs.label;    
-            var font = style.font || '10pt Arial bold';
+            var font = style.font || '10pt Verdana bold';
             var padding = style.padding || 2;
             var align = style.align || 'start';
 
@@ -1492,7 +1557,7 @@
         rcandle: '#FF0000',
         gcandle: '#00FF00',
         lineplot: '#CCCCCC',
-        idcss: 'position:absolute; border: 2px solid #0066CC; background: #FFFFCC;font-size:10px;font-family:arial,sans-serif;text-align:center;width:80px;height:100px; padding:2px;', 
+        idcss: 'position:absolute; border: 2px solid #0066CC; background: #FFFFCC;font-size:10px;font-family:verdana;text-align:center;width:80px;height:100px; padding:2px;', 
         oloffset : 0
 
     };
@@ -1510,7 +1575,7 @@
         rcandle: '#880000',
         gcandle: '#008800',
         lineplot: '#333333',
-        idcss: 'position:absolute; border: 2px solid #0066CC; background: #FFFFCC;font-size:10px;font-family:arial,sans-serif;text-align:center;width:80px;height:100px; padding:2px;',
+        idcss: 'position:absolute; border: 2px solid #0066CC; background: #FFFFCC;font-size:10px;font-family:verdana;text-align:center;width:80px;height:100px; padding:2px;',
         oloffset : 0
     };
 
@@ -1545,6 +1610,21 @@
            if (data[i] < min) min = data[i]; 
         }
         return [min, max];
+    };
+
+    function _drawarrow(ctx, fromx, fromy, tox, toy, color, width) {
+        color = color || "#111111";
+        var width = width || 1.0;
+
+	var headlen = 10;
+	var angle = Math.atan2(toy-fromy, tox-fromx);
+	ctx.moveTo(fromx, fromy);
+	ctx.lineTo(tox, toy);
+	ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6), toy-headlen*Math.sin(angle-Math.PI/6));
+	ctx.moveTo(tox, toy);
+	ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6), toy-headlen*Math.sin(angle+Math.PI/6));
+	ctx.stroke();
+	ctx.closePath();
     };
 
     function _drawline(ctx, x1, y1, x2, y2, color, width) {
