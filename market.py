@@ -67,7 +67,7 @@ class PikaClient(object):
         # Append it to our messages list
         # self.messages.append(body)
         symbol, uuid = body.split("|")
-        trend = db.get("""SELECT * FROM trends WHERE uuid = %s""", uuid)
+        trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
         
         for listener in LISTENERS:
             date = datetime.now()
