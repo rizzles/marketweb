@@ -171,7 +171,7 @@ class TrendHandler(BaseHandler):
         trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
         
         # zoomed in version
-        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['startdate']-20000)))
+        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['startdate']-2000000)))
 #        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['date'])-20))
 
         p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
