@@ -124,15 +124,17 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     def get(self):
         ticks = db.query("SHOW TABLES")
-        trends = db.query("SELECT * FROM trends ORDER BY created desc LIMIT 200")
+        trends = db.query("SELECT * FROM trends.trends ORDER BY created desc LIMIT 200")
         symbols = []
         dbtrends = []
+        print trends
 
         for t in ticks:
-            if t['Tables_in_market'] == 'trends':
-                pass
-            else:
-                symbols.append(t['Tables_in_market'])
+            symbol = t['Tables_in_ticks']
+            symbol = symbol.replace("_ten", " ten min") 
+            symbol = symbol.replace("_thirty", " thirty min") 
+            symbol = symbol.replace("_sixty", " sixty min") 
+            symbols.append(symbol)
 
         for trend in trends:
             temp = {}
@@ -166,11 +168,10 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 class TrendHandler(BaseHandler):
     def get(self):
         uuid = self.get_argument("uuid", None)
-        trend = db.get("""SELECT * FROM trends WHERE uuid = %s""", uuid)
+        trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
         
         # zoomed in version
-
-        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date > %s and date < %s order by date"""% (trend['symbol'], int(trend['startdate']-45), int(trend['date']+90)))
+        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['startdate']-20000)))
 #        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['date'])-20))
 
         p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
@@ -179,11 +180,17 @@ class TrendHandler(BaseHandler):
         p4 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p4']))
         p5 = None
         if trend['p5']:
-            p5 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p5']))            
+            p5 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p5']))
 
         hold = []
         count = 0
+        print len(ticks)
+        print p1, trend['p1']
+        print p2, trend['p2']
+        print p3, trend['p3']
+        print p4, trend['p4']
         for tick in ticks:
+            print tick
             if tick['date'] == p1['date']:
                 p1['date'] = count
             if tick['date'] == p2['date']:
@@ -194,7 +201,7 @@ class TrendHandler(BaseHandler):
                 p4['date'] = count
             if p5 and tick['date'] == p5['date']:
                 p5['date'] = count
-            tick['date'] = datetime.fromordinal(int(tick['date']))
+            tick['date'] = datetime.fromtimestamp(tick['date'])
             tick['date'] = tick['date'].strftime("%Y-%m-%d %I:%M:%S")
             hold.append([tick['date'], tick['open'], tick['high'], tick['low'], tick['close']])
             count += 1
@@ -259,11 +266,16 @@ class FeedHandler(BaseHandler):
         if not symbol:
             return
 
+        symbol = symbol.replace(' ten min', '_ten')
+        symbol = symbol.replace(' thirty min', '_thirty')
+        symbol = symbol.replace(' sixty min', '_sixty')
+        
         ticks = db.query("""SELECT date,open,close,high,low,id from %s order by date"""% symbol)
         hold = []
         
         for tick in ticks:
-            tick['date'] = datetime.fromordinal(int(tick['date']))
+            print tick
+            tick['date'] = datetime.fromtimestamp(tick['date'])
             tick['date'] = tick['date'].strftime("%Y-%m-%d %I:%M:%S")
             hold.append([tick['date'], tick['open'], tick['high'], tick['low'], tick['close']])
 
