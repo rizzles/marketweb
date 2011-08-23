@@ -151,14 +151,16 @@
 		//_drawline(this.ctx, xline1, h-y1, xline2, h-y2, '#fff', 2);
 		_drawline(this.ctx, xline1, h-y1, xline2+2000*Math.cos(angle-Math.PI), (h-y2)+2000*Math.sin(angle-Math.PI), '#fff', 2);
 	    }
+
 	    for (var i in points) {
-		var y1 = Math.round((_log(points[i][1])-cp.ymin)*scale);
+      		var y1 = Math.round((_log(points[i][1])-cp.ymin)*scale);
 		var y2 = Math.round((_log(points[i][3])-cp.ymin)*scale);
 
 		// horizontal = date
 		// xlo finds left edge of candlestick
 		var xlo1 = (c + (points[i][0]-xmin)*cp.cwidth) - csize + this.loffset;
 		var xlo2 = (c + (points[i][2]-xmin)*cp.cwidth) - csize + this.loffset;
+
 		// xline should find middle of candlestick
 		var xline1 = xlo1 + Math.round(csize/2);
 		var xline2 = xlo2 + Math.round(csize/2);
@@ -714,14 +716,14 @@
                 var wom = (tmscale == 'weekly' ? d.getDay(): d.getDate());
                 if ( wom < pwd) { // new week has started 
                     cwi++; 
-                    wohlc[cwi] = [dt[0], dt[1], dt[2], dt[3]]; 
-                    wts[cwi] = ts[i]; 
+                    wohlc[cwi] = [dt[0], dt[1], dt[2], dt[3]];
+                    wts[cwi] = ts[i];
                     v[cwi] = volume[i];
                     whi = dt[1];
-                    wlo = dt[2]; 
+                    wlo = dt[2];
                 } else { 
                     if (dt[1] > whi) {
-                        whi = dt[1]; 
+                        whi = dt[1];
                         wohlc[cwi][1] = whi;
                     } 
                     if (dt[2] < wlo) { 
