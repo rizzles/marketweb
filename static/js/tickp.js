@@ -149,7 +149,7 @@
 		angle = Math.atan2(y2-y1, xline1-xline2);
 
 		//_drawline(this.ctx, xline1, h-y1, xline2, h-y2, '#fff', 2);
-		_drawline(this.ctx, xline1, h-y1, xline2+1000*Math.cos(angle-Math.PI), (h-y2)+1000*Math.sin(angle-Math.PI), '#fff', 2);
+		_drawline(this.ctx, xline1, h-y1, xline2+2000*Math.cos(angle-Math.PI), (h-y2)+2000*Math.sin(angle-Math.PI), '#fff', 2);
 	    }
 	    for (var i in points) {
 		var y1 = Math.round((_log(points[i][1])-cp.ymin)*scale);
