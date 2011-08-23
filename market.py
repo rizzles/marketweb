@@ -171,7 +171,7 @@ class TrendHandler(BaseHandler):
         trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
         
         # zoomed in version
-        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['startdate']-2000000)))
+        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['startdate']-200000)))
 #        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['date'])-20))
 
         p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
@@ -184,13 +184,8 @@ class TrendHandler(BaseHandler):
 
         hold = []
         count = 0
-        print len(ticks)
-        print p1, trend['p1']
-        print p2, trend['p2']
-        print p3, trend['p3']
-        print p4, trend['p4']
+
         for tick in ticks:
-            print tick
             if tick['date'] == p1['date']:
                 p1['date'] = count
             if tick['date'] == p2['date']:
@@ -211,34 +206,38 @@ class TrendHandler(BaseHandler):
         if trend['type'] == 'Upward Triangle':
             line.append([p2['date'], p2['low'], p4['date'], p4['low']])
             line.append([p1['date'], p1['high'], p3['date'], p3['high']])
-            points.append([p1['date']-0.1, p1['high']+0.3, p1['date']-0.5, p1['high']+2])
-            points.append([p2['date']-0.1, p2['low']-0.3, p2['date']-0.5, p2['low']-2])
-            points.append([p3['date']-0.1, p3['high']+0.3, p3['date']-0.5, p3['high']+2])
-            points.append([p4['date']-0.1, p4['low']-0.3, p4['date']-0.5, p4['low']-2])
+
+            points.append([p1['date']-0.1, p1['high'], p1['date']-(p1['date']*0.01), p1['high']+(p1['high']*0.003)])
+            points.append([p2['date']-0.1, p2['low'], p2['date']-(p2['date']*0.01), p2['low']-(p2['low']*0.003)])
+            points.append([p3['date']-0.1, p3['high'], p3['date']-(p3['date']*0.01), p3['high']+(p3['high']*0.003)])
+            points.append([p4['date']-0.1, p4['low'], p4['date']-(p4['date']*0.01), p4['low']-(p4['low']*0.003)])
 
         if trend['type'] == 'Downward Triangle':
             line.append([p2['date'], p2['high'], p4['date'], p4['high']])
             line.append([p1['date'], p1['low'], p3['date'], p3['low']])
-            points.append([p1['date']-0.1, p1['low']-0.3, p1['date']-0.5, p1['low']-2])
-            points.append([p2['date']-0.1, p2['high']+0.3, p2['date']-0.5, p2['high']+2])
-            points.append([p3['date']-0.1, p3['low']-0.3, p3['date']-0.5, p3['low']-2])
-            points.append([p4['date']-0.1, p4['high']+0.3, p4['date']-0.5, p4['high']+2])
+
+            points.append([p1['date']-0.1, p1['low'], p1['date']-(p1['date']*0.01), p1['low']-(p1['low']*0.003)])
+            points.append([p2['date']-0.1, p2['high'], p2['date']-(p2['date']*0.01), p2['high']+(p2['high']*0.003)])
+            points.append([p3['date']-0.1, p3['low'], p3['date']-(p3['date']*0.01), p3['low']-(p3['low']*0.003)])
+            points.append([p4['date']-0.1, p4['high'], p4['date']-(p4['date']*0.01), p4['high']+(p4['high']*0.003)])
 
         if trend['type'] == 'Upward Head and Shoulders':
             line.append([p2['date'], p2['low'], p4['date'], p4['low']])
-            points.append([p1['date']-0.1, p1['high']+0.3, p1['date']-0.5, p1['high']+2])
-            points.append([p2['date']-0.1, p2['low']-0.3, p2['date']-0.5, p2['low']-2])
-            points.append([p3['date']-0.1, p3['high']+0.3, p3['date']-0.5, p3['high']+2])
-            points.append([p4['date']-0.1, p4['low']-0.3, p4['date']-0.5, p4['low']-2])
-            points.append([p5['date']-0.1, p5['high']+0.3, p5['date']-0.5, p5['high']+2])
+
+            points.append([p1['date']-0.1, p1['high'], p1['date']-(p1['date']*0.01), p1['high']+(p1['high']*0.003)])
+            points.append([p2['date']-0.1, p2['low'], p2['date']-(p2['date']*0.01), p2['low']-(p2['low']*0.003)])
+            points.append([p3['date']-0.1, p3['high'], p3['date']-(p3['date']*0.01), p3['high']+(p3['high']*0.005)])
+            points.append([p4['date']-0.1, p4['low'], p4['date']-(p4['date']*0.01), p4['low']-(p4['low']*0.005)])
+            points.append([p5['date']-0.1, p5['high'], p5['date']-(p5['date']*0.01), p5['high']+(p5['high']*0.005)])
 
         if trend['type'] == 'Downward Head and Shoulders':
             line.append([p2['date'], p2['high'], p4['date'], p4['high']])
-            points.append([p1['date']-0.1, p1['low']-0.3, p1['date']-0.5, p1['low']-2])
-            points.append([p2['date']-0.1, p2['high']+0.3, p2['date']-0.5, p2['high']+2])
-            points.append([p3['date']-0.1, p3['low']-0.3, p3['date']-0.5, p3['low']-2])
-            points.append([p4['date']-0.1, p4['high']+0.3, p4['date']-0.5, p4['high']+2])
-            points.append([p5['date']-0.1, p5['low']-0.3, p5['date']-0.5, p5['low']-2])
+
+            points.append([p1['date']-0.1, p1['low'], p1['date']-(p1['date']*0.01), p1['low']-(p1['low']*0.005)])
+            points.append([p2['date']-0.1, p2['high'], p2['date']-(p2['date']*0.01), p2['high']+(p2['high']*0.005)])
+            points.append([p3['date']-0.1, p3['low'], p3['date']-(p3['date']*0.01), p3['low']-(p3['low']*0.005)])
+            points.append([p4['date']-0.1, p4['high'], p4['date']-(p4['date']*0.01), p4['high']+(p2['high']*0.005)])
+            points.append([p5['date']-0.1, p5['low'], p5['date']-(p5['date']*0.01), p5['low']-(p3['low']*0.005)])
 
         data = {'trend': 
                 {"label" : trend['symbol'],
