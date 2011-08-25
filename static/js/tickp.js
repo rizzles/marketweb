@@ -483,10 +483,17 @@
                     var t = ycl; ycl = yop; yop = t; 
                 }
                 if(cp.type == 1) {  // candle-stick
-                    ctx.fillRect( xlo, h-yop, csize, yop-ycl);
+		    // fix if price stays the same
+		    if (yop-ycl == 0) {
+			height = 1;
+		    } else {
+			height = yop-ycl;
+		    }
+		    //ctx.fillRect( xlo, h-yop, csize, yop-ycl);
+		    ctx.fillRect( xlo, h-yop, csize, height);
                     _drawline(ctx,xline, h-yhi, xline, h-ylo, ctx.fillStyle, 1);
                 } else if( cp.type == 2) { // OHLC 
-                    _drawline(ctx,xline, h-yhi, xline, h-ylo, ctx.fillStyle, 2);
+		    _drawline(ctx,xline, h-yhi, xline, h-ylo, ctx.fillStyle, 2);
                     _drawline(ctx, xlo, h-yop, xline, h-yop, ctx.fillStyle, 2);
                     _drawline(ctx, xline, h-ycl, xlo+csize, h-ycl, ctx.fillStyle, 2);
                 } else {  
@@ -554,6 +561,7 @@
             }
 
             /* and X and Y axis  FIXME:  get it right */ 
+	    /* price label and lines */
             var ystops = this._ygrid(_exp(ymin), _exp(ymax), 10);
             for(var i in ystops) {
                 var logystp = _log(ystops[i]);
@@ -565,6 +573,7 @@
                 } 
             };
             
+	    /* time stamp label and lines */
             var howmany = xmax-xmin;
             var xstop = Math.floor(howmany/cp.maxxlabels);
             h = h + (cp.numindicators+1)*this.loweriht;
@@ -756,7 +765,6 @@
                     this.cp.end = this.dailydata.ohlc.length;
                     break;
                 case 1:
-                    
                     if(!this.weeklydata) {
                         this.timescale(this.dailydata.ts, this.dailydata.ohlc, this.dailydata.vol, 'weekly');
                     }
@@ -818,21 +826,25 @@
         should scale from Penny stocks to Zimbabwe market */ 
         _ygrid: function(ymin, ymax, howmany) {
             var approx = (ymax - ymin)/howmany;
-            lookup = [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 
+            lookup = [0.001, 0.0025, 0.005, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 
                  100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 
                  10000.0, 25000.0];
 
             var na = []
             for (i in lookup) {
                 var b = lookup[i]/approx;
-                if (b < 1.0) { b = 1/b; } 
+		if (b < 1.0) { 
+		    b = 1/b; 
+		} 
                 na.push(b);
             }
+
             var closest = lookup[na.indexOf(Math.min.apply(this,na))];
             var minindex = Math.ceil(ymin/closest); 
             var maxindex = Math.floor(ymax/closest);
             vals = [];
-            for(var j = minindex; j <= maxindex; j++) { 
+
+	    for(var j = minindex; j <= maxindex; j++) { 
                 vals.push(j*closest);
             }
 
@@ -1769,11 +1781,16 @@
         var d = new Date(ts);
         var dd = d.getDate();
         var mm = d.getMonth() + 1;
+	var hh = d.getHours();
+	var minutes = d.getMinutes();
         dd = (dd >= 10? dd : '0' + dd); 
         mm = (mm >= 10? mm : '0' + mm);       
         yy = d.getFullYear(); 
+	hh = hh + 7;
+        minutes = (minutes >= 10? minutes : '0' + minutes); 
 
-        return yy + '-' + mm + '-' + dd;
+	//        return yy + '-' + mm + '-' + dd;
+        return mm + '-' + dd + ' ' + hh + ':' + minutes;
     }; 
 
     // The following validation should ideally be done by the client who calls us
