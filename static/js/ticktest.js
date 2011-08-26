@@ -14,6 +14,7 @@ $(document).ready(function() {
 	    $("#"+wsdata[0]).click(gettrend);
 	}
 
+	// ajax request for chart data for trend
 	var gettrend = function() {	
 		var uuid = $(this).attr('id');
 		var urlstr = '/trend/?uuid=' + uuid;
@@ -23,7 +24,8 @@ $(document).ready(function() {
 			    dataType : 'json', 
 			    type: 'GET', 
 			    success: function(data) { 
-			        $('.topchart').html(data['trend']['label']+' '+data['trendtype']);
+			    console.log(data);
+			        $('.topchart').html(data['chartdate']+' '+data['trend']['label']+' '+data['trendtype']);
 			        var r = plot.read(data['trend']);
 			        if(!r) { 
 				  return;
@@ -62,9 +64,19 @@ $(document).ready(function() {
 	    });
 
 	$('.trend').each(function() {
-		var uuid = $(this).attr('id');
+		var uuid = $(this).parent().attr('id');
 		$("#"+uuid).click(gettrend);
 	    });
 
-        //plot.getindicators();
+        $(".remove_trend").click(function(event) {
+		var uuid = $(this).parent().attr('id');
+		$("#"+uuid).remove();
+		var urlstr = '/removetrend/?uuid=' + uuid;
+		$.ajax({
+			url : urlstr, 
+			    data : {},
+			    dataType : 'json', 
+			    type: 'GET', 
+		    });
+	    });
     });

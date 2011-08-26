@@ -70,10 +70,11 @@ class PikaClient(object):
         trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
         
         for listener in LISTENERS:
-            date = datetime.now()
+            date = datetime.fromtimestamp(int(trend['created']))
             date = date-timedelta(hours=5)
-            date = date.strftime("%Y-%m-%d %I:%M:%S")
-            html = uuid +"|<p><span class='label labelcolor1'>"+date+" "+symbol+" </span><span class='trend' id='"+uuid+"'>%s trend discovered</span><a href='/full/?uuid=%s' target='_blank'><img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:5px'></a></p>"% (trend['type'], uuid)
+            date = date.strftime("%Y-%m-%d %I:%M:%S")            
+
+            html = uuid +"|<p id='%s'><img src='/static/images/remove-button.gif' width='10' height='10' style='margin-left:1px; margin-right:3px' class='remove_trend'/><span class='label labelcolor1'>"+date+" "+symbol+" </span><span class='trend'>%s trend discovered</span><a href='/full/?uuid=%s' target='_blank'><img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:1px'></a></p>"% (uuid, trend['type'], uuid)
             listener.write_message(html)
 
     def on_closed(self, connection):
@@ -96,6 +97,7 @@ class Application(tornado.web.Application):
             (r"/", MainHandler),
             (r"/feed/", FeedHandler),
             (r"/trend/", TrendHandler),
+            (r"/removetrend/", RemoveTrendHandler),
             (r"/full/", FullHandler),
 
             (r"/ws/", EchoWebSocket),
@@ -124,10 +126,9 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     def get(self):
         ticks = db.query("SHOW TABLES")
-        trends = db.query("SELECT * FROM trends.trends ORDER BY created desc LIMIT 200")
+        trends = db.query("SELECT * FROM trends.trends ORDER BY created desc")
         symbols = []
         dbtrends = []
-        print trends
 
         for t in ticks:
             symbol = t['Tables_in_ticks']
@@ -165,6 +166,12 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             pass
 
 
+class RemoveTrendHandler(BaseHandler):
+    def get(self):
+        uuid = self.get_argument("uuid", None)
+        db.execute("""DELETE FROM trends.trends WHERE uuid = %s""", uuid)
+
+
 class TrendHandler(BaseHandler):
     def get(self):
         uuid = self.get_argument("uuid", None)
@@ -181,6 +188,10 @@ class TrendHandler(BaseHandler):
         p5 = None
         if trend['p5']:
             p5 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p5']))
+
+        chartdate = datetime.fromtimestamp(trend['created'])
+        chartdate = chartdate-timedelta(hours=5)
+        chartdate = chartdate.strftime("%Y-%m-%d %I:%M:%S")
 
         hold = []
         count = 0
@@ -238,14 +249,15 @@ class TrendHandler(BaseHandler):
             points.append([p3['date'], p3['low'], p3['date']-(p3['date']*0.01), p3['low']-(p3['low']*0.005)])
             points.append([p4['date'], p4['high'], p4['date']-(p4['date']*0.01), p4['high']+(p2['high']*0.005)])
             points.append([p5['date'], p5['low'], p5['date']-(p5['date']*0.01), p5['low']-(p3['low']*0.005)])
-
+        
         data = {'trend': 
                 {"label" : trend['symbol'],
                 "data" : hold},
 
                 'lines': line,
                 'points': points,
-                'trendtype': trend['type']
+                'trendtype': trend['type'],
+                'chartdate': chartdate
                 }
 
         self.write(tornado.escape.json_encode(data))
@@ -273,7 +285,6 @@ class FeedHandler(BaseHandler):
         hold = []
         
         for tick in ticks:
-            print tick
             tick['date'] = datetime.fromtimestamp(tick['date'])
             tick['date'] = tick['date'].strftime("%Y-%m-%d %I:%M:%S")
             hold.append([tick['date'], tick['open'], tick['high'], tick['low'], tick['close']])

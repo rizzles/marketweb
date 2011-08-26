@@ -64,6 +64,10 @@ body {
   color: #00ff00;
 }
 
+.remove_trend:hover {
+    cursor: pointer;
+}
+
 .screen .console .trend:hover {
     text-decoration: underline;
     cursor: pointer;

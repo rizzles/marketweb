@@ -10,7 +10,7 @@ $(document).ready(function() {
 		    dataType : 'json', 
 		    type: 'GET', 
 		    success: function(data) { 
-		    $('.topchart').html(data['trend']['label']+' '+data['trendtype']);
+		    $('.topchart').html(data['chartdate']+' '+data['trend']['label']+' '+data['trendtype']);
 		    var r = plot.read(data['trend']);
 		    if(!r) { 
 			return;

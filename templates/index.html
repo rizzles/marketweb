@@ -66,9 +66,16 @@
 	    <div class="console">
 	      <div class="websocket">
 		{% for h in dbtrends %}
-		<p>
-		  <span class="label labelcolor1">{{h['date']}} {{h['symbol']}}</span> <span class="trend" id="{{h['uuid']}}">{{h['trendtype']}} trend discovered</span><a href='/full/?uuid={{h["uuid"]}}' target='_blank'><img src='/static/images/enlarge-button.gif' width='12' height='12' style='margin-left:5px'></a>
+
+		<p id='{{h['uuid']}}'>
+		  <img src='/static/images/remove-button.gif' width='10' height='10' style='margin-left:1px; margin-right:3px' class='remove_trend'/>
+		  <span class="label labelcolor1">{{h['date']}} {{h['symbol']}}</span>
+		  <span class="trend">{{h['trendtype']}} trend discovered</span>
+		  <a href='/full/?uuid={{h["uuid"]}}' target='_blank'>
+		    <img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:1px'>
+		  </a>
 		</p>
+
 		{% end %}
 		<p>
 		  <span class="label labelcolor1">Connected to server... </span>
