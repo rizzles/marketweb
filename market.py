@@ -73,7 +73,6 @@ class PikaClient(object):
             date = datetime.fromtimestamp(int(trend['created']))
             date = date-timedelta(hours=5)
             date = date.strftime("%Y-%m-%d %I:%M:%S")            
-
             html = uuid +"|<p id='%s'><img src='/static/images/remove-button.gif' width='10' height='10' style='margin-left:1px; margin-right:3px' class='remove_trend'/><span class='label labelcolor1'>"+date+" "+symbol+" </span><span class='trend'>%s trend discovered</span><a href='/full/?uuid=%s' target='_blank'><img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:1px'></a></p>"% (uuid, trend['type'], uuid)
             listener.write_message(html)
 
@@ -141,6 +140,7 @@ class MainHandler(BaseHandler):
             temp = {}
             date = datetime.fromtimestamp(int(trend['created']))
             date = date-timedelta(hours=5)
+#            date = date.strftime("%Y-%m-%d %I:%M:%S")            
             date = date.strftime("%Y-%m-%d %I:%M:%S")            
             temp['date'] = date
             temp['symbol'] = trend['symbol']

@@ -56,7 +56,7 @@
                               simple trendline support. 
             - pan/zoom   (1): Moves along the time axis. TODO: Zoom mode 
         */
-        mode: 1, // 0: navigation 1: pan and zoom 
+        mode: 0, // 0: navigation 1: pan and zoom 
 
         // supported indicators 
         supported : ['ema', 'sma', 'psar', 'bbands', 'rsi', 'stoch', 'macd'], 
@@ -1790,7 +1790,8 @@
         minutes = (minutes >= 10? minutes : '0' + minutes); 
 
 	//        return yy + '-' + mm + '-' + dd;
-        return mm + '-' + dd + ' ' + hh + ':' + minutes;
+        //        return mm + '-' + dd + ' ' + hh + ':' + minutes;
+        return hh + ':' + minutes;
     }; 
 
     // The following validation should ideally be done by the client who calls us
