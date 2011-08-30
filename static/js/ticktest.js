@@ -5,7 +5,7 @@ $(document).ready(function() {
 	var ws = new WebSocket("ws://184.73.152.25:80/ws/");
 	// var ws = new WebSocket("ws://ec2-184-73-83-109.compute-1.amazonaws.com:80/ws/");
 	// dev server
-	// var ws = new WebSocket("ws://ec2-184-73-24-67.compute-1.amazonaws.com:80/ws/");
+	//var ws = new WebSocket("ws://ec2-184-73-24-67.compute-1.amazonaws.com:80/ws/");
 
 	// updates the gui stating that we have a new trend found
 	ws.onmessage = function(event) {
