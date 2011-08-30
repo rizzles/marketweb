@@ -56,7 +56,7 @@
                               simple trendline support. 
             - pan/zoom   (1): Moves along the time axis. TODO: Zoom mode 
         */
-        mode: 0, // 0: navigation 1: pan and zoom 
+        mode: 1, // 0: navigation 1: pan and zoom 
 
         // supported indicators 
         supported : ['ema', 'sma', 'psar', 'bbands', 'rsi', 'stoch', 'macd'], 
