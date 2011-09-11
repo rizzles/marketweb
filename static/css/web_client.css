@@ -273,3 +273,7 @@ div.add-button:hover {
 #templates {
   display: none;
 }
+
+div.websocket p a {
+    text-decoration: none;
+}

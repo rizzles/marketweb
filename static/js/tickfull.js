@@ -19,7 +19,6 @@ $(document).ready(function() {
 		    plot.lines = data['lines'];
 		    plot.points = data['points'];
 		    plot.drawtrendlines();
-		    plot.drawpoints();
 		}
 	    });
     });

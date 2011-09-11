@@ -2,8 +2,7 @@ $(document).ready(function() {
         plot = window.tickp("#chart");
         plot.plotempty();
 	// production server
-	var ws = new WebSocket("ws://184.73.152.25:80/ws/");
-	// var ws = new WebSocket("ws://ec2-184-73-83-109.compute-1.amazonaws.com:80/ws/");
+	var ws = new WebSocket("ws://ec2-174-129-255-230.compute-1.amazonaws.com:80/ws/");
 	// dev server
 	//var ws = new WebSocket("ws://ec2-184-73-24-67.compute-1.amazonaws.com:80/ws/");
 
@@ -25,7 +24,6 @@ $(document).ready(function() {
 			    dataType : 'json', 
 			    type: 'GET', 
 			    success: function(data) { 
-			    console.log(data);
 			        $('.topchart').html(data['chartdate']+' '+data['trend']['label']+' '+data['trendtype']);
 			        var r = plot.read(data['trend']);
 			        if(!r) { 
@@ -35,7 +33,6 @@ $(document).ready(function() {
 				plot.lines = data['lines'];
 				plot.points = data['points'];
 				plot.drawtrendlines();
-				plot.drawpoints();
 			}
 		    });
 	}
@@ -47,6 +44,9 @@ $(document).ready(function() {
 		var urlstr = '/feed/?symbol=' + symbol;
 		$('input[type=radio]').attr('checked', false);
 		$('input[type=radio]', this).attr('checked', true);
+		plot.plotempty();
+		plot.lines = null;
+		plot.points = null;
 		$.ajax({
 			url : urlstr, 
 			    data : {},
@@ -58,8 +58,7 @@ $(document).ready(function() {
 			        if(!r) { 
 				  return;
 			    } 
-				//plot.plot();
-				//plot.drawlines();
+
 			}
 		    });
 	    });

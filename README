@@ -1,3 +1,10 @@
 This is the tornado based web page interface to the market trend finder.
 
 Websocket real time updates from rabbitmq/pika.
+
+9-10-11
+--------------------
+1. Added margin on the right so price doesn't get cut off
+2. Added line in to keep trendlines on screen when scrolling through ticks.
+3. Should display date at bottom of chart if it is a new day
+4. Started to add watch list buttons

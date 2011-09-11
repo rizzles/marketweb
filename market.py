@@ -280,6 +280,7 @@ class FeedHandler(BaseHandler):
         symbol = symbol.replace(' ten min', '_ten')
         symbol = symbol.replace(' thirty min', '_thirty')
         symbol = symbol.replace(' sixty min', '_sixty')
+        symbol = symbol.replace(' daily', '_daily')
         
         ticks = db.query("""SELECT date,open,close,high,low,id from %s order by date"""% symbol)
         hold = []
@@ -290,7 +291,11 @@ class FeedHandler(BaseHandler):
             hold.append([tick['date'], tick['open'], tick['high'], tick['low'], tick['close']])
 
         data = {"label" : symbol,
-                "data" : hold
+                "data" : hold,
+                "lines" : None,
+                "points" : None,
+                "trendtype" : None,
+                "chartdate" : None
                 }
         
         self.write(tornado.escape.json_encode(data))

@@ -72,8 +72,9 @@
 		  <span class="label labelcolor1">{{h['date']}} {{h['symbol']}}</span>
 		  <span class="trend">{{h['trendtype']}} trend discovered</span>
 		  <a href='/full/?uuid={{h["uuid"]}}' target='_blank'>
-		    <img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:1px'>
+		    <img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:1px;' border='0'>
 		  </a>
+		  <img src='/static/images/add-button.gif' width='10' height='10' style='margin-left:5px' border='0'>
 		</p>
 
 		{% end %}
@@ -83,7 +84,22 @@
 	      </div>
 	    </div>
 	  </div>
-	
+
+	  <div id="bottom">
+	    <div id="bottom2">
+<!--	      <div id="stats">
+		<div class="stat nodes"><b>0</b> nodes</div>
+		<div class="stat log_files"><b>0</b> log files</div>
+		<div class="stat messages"><b>0</b> messages</div>
+		<div class="stat elapsed"><b>0:00</b> elapsed</div>
+		<div class="stat rate"><b>0.00</b> messages/sec</div>
+	      </div>
+-->
+	      <div class="add-buttons">
+		<div class="add-button" id="start-simulation">+ Watch List</div>
+	      </div>
+	    </div>
+
 	</div>
       </div>
       

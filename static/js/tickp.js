@@ -33,7 +33,7 @@
         /* The chart layout properties follow */ 
         /* first get the width */
         loffset : 3,
-        rmargin : 40,
+        rmargin : 50,
         plotwidth : 800,
         width : undefined, 
         /* tmargin and ttext row is the upper row. */
@@ -77,6 +77,10 @@
             this.target = $$(target);
             this.cs = $.tickp.csdark;
 
+	    this.holddate = 0;
+	    this.holdmonth = 0;
+	    this.holdyear = 0;
+
 	    this.width = this.loffset + this.rmargin + this.plotwidth;
 
             // this.topmargin = this.tmargin + this.ttextrow,
@@ -100,13 +104,6 @@
             window.$plot = this;
             return this;
         },
-
-	drawpoints: function() {
-	    var points = this.points;
-
-	    
-
-	},
 
         drawtrendlines: function() {
             var lines = this.lines;
@@ -167,6 +164,7 @@
 
 		_drawarrow(this.ctx, xline2, h-y2, xline1, h-y1, '#fff', 2);
 	    }
+
         },
 
         drawlines: function() {
@@ -202,7 +200,7 @@
                 } 
                 this.canvas.plot = this;
                 this.target.appendChild(this.canvas);
-            
+		
                 this.overlay = _getCanvas(this.width, this.height);
                 if (!this.overlay) {
                     throw "Cannot Initialize overlay";
@@ -482,6 +480,7 @@
                     ctx.fillStyle = cs.gcandle;
                     var t = ycl; ycl = yop; yop = t; 
                 }
+
                 if(cp.type == 1) {  // candle-stick
 		    // fix if price stays the same
 		    if (yop-ycl == 0) {
@@ -492,6 +491,7 @@
 		    //ctx.fillRect( xlo, h-yop, csize, yop-ycl);
 		    ctx.fillRect( xlo, h-yop, csize, height);
                     _drawline(ctx,xline, h-yhi, xline, h-ylo, ctx.fillStyle, 1);
+
                 } else if( cp.type == 2) { // OHLC 
 		    _drawline(ctx,xline, h-yhi, xline, h-ylo, ctx.fillStyle, 2);
                     _drawline(ctx, xlo, h-yop, xline, h-yop, ctx.fillStyle, 2);
@@ -502,14 +502,9 @@
                     } 
                     prevxy = [xline, h-ycl];
                 }
-                /* try plotting the volume */ 
-                if(vol[i]) { 
-                    var yvol = vol[i] * vscale;
-                    // FIXME : Fix for opera, check if it works 
-                    ctx.fillRect( xlo, vh-yvol, csize, yvol);
-                } 
-    
             };
+	    // Added this in to keep trend lines when scrolling in the tick window
+	    this.drawtrendlines();	    
 
             /* plot any overlay indicators */
             var k = 0; 
@@ -577,6 +572,9 @@
             var howmany = xmax-xmin;
             var xstop = Math.floor(howmany/cp.maxxlabels);
             h = h + (cp.numindicators+1)*this.loweriht;
+	    plot.holddate = 0;
+	    plot.holdmonth = 0;
+	    plot.holdyear = 0;
             for(var i = xmin; i < xmax; i++) { 
                 if(i%xstop == 0) {
                     var label = this._idxToDate(i);
@@ -1783,15 +1781,21 @@
         var mm = d.getMonth() + 1;
 	var hh = d.getHours();
 	var minutes = d.getMinutes();
+
         dd = (dd >= 10? dd : '0' + dd); 
         mm = (mm >= 10? mm : '0' + mm);       
         yy = d.getFullYear(); 
 	hh = hh + 7;
         minutes = (minutes >= 10? minutes : '0' + minutes); 
 
-	//        return yy + '-' + mm + '-' + dd;
-        //        return mm + '-' + dd + ' ' + hh + ':' + minutes;
-        return hh + ':' + minutes;
+	if (dd > plot.holddate || mm > plot.holdmonth || yy > plot.holdyear ) {
+	    plot.holddate = dd;
+	    plot.holdmonth = mm;
+	    plot.holdyear = yy;
+	    return mm + '-' + dd + ' ' + hh + ':' + minutes;
+	} else {
+	    return hh + ':' + minutes;
+	}
     }; 
 
     // The following validation should ideally be done by the client who calls us
