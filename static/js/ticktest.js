@@ -15,9 +15,13 @@ $(document).ready(function() {
 	}
 
 	// ajax request for chart data for trend
-	var gettrend = function() {	
-		var uuid = $(this).attr('id');
+	var gettrend = function(uuid) {
+	        var uuid = $(this).attr('id');
 		var urlstr = '/trend/?uuid=' + uuid;
+		//plot.plotempty();
+		plot.lines = null;
+		plot.points = null;
+
 		$.ajax({
 			url : urlstr, 
 			    data : {},
@@ -44,7 +48,7 @@ $(document).ready(function() {
 		var urlstr = '/feed/?symbol=' + symbol;
 		$('input[type=radio]').attr('checked', false);
 		$('input[type=radio]', this).attr('checked', true);
-		plot.plotempty();
+		//plot.plotempty();
 		plot.lines = null;
 		plot.points = null;
 		$.ajax({
@@ -63,9 +67,38 @@ $(document).ready(function() {
 		    });
 	    });
 
-	$('.trend').each(function() {
-		var uuid = $(this).parent().attr('id');
-		$("#"+uuid).click(gettrend);
+        $(".watchlabel").click(function(event) {
+	        var uuid = $(this).parent().attr('id');
+		$('input[type=radio]').attr('checked', false);
+		$('.stream'+uuid).attr('checked', true);
+		var urlstr = '/trend/?uuid=' + uuid;
+
+		//plot.plotempty();
+		plot.lines = null;
+		plot.points = null;
+
+		$.ajax({
+			url : urlstr, 
+			    data : {},
+			    dataType : 'json', 
+			    type: 'GET', 
+			    success: function(data) { 
+			        $('.topchart').html(data['chartdate']+' '+data['trend']['label']+' '+data['trendtype']);
+			        var r = plot.read(data['trend']);
+			        if(!r) { 
+				  return;
+			    } 
+
+				plot.lines = data['lines'];
+				plot.points = data['points'];
+				plot.drawtrendlines();
+			}
+		    });
+	    });
+
+	$('.trend').each(function(event) {
+ 		var uuid = $(this).parent().attr('id');
+		$("#trend"+uuid).click(gettrend);
 	    });
 
         $(".remove_trend").click(function(event) {
@@ -79,4 +112,45 @@ $(document).ready(function() {
 			    type: 'GET', 
 		    });
 	    });
+
+        $(".deletewatch").click(function(event) {
+		var uuid = $(this).parent().attr('id');
+		$("#"+uuid).remove();
+		var urlstr = '/removewatchlist/?uuid=' + uuid;
+		$.ajax({
+			url : urlstr, 
+			    data : {},
+			    dataType : 'json', 
+			    type: 'GET', 
+		    });
+	    });
+
+        $(".addwatchlist").click(function(event) {
+		var uuid = $(this).parent().attr('id');
+		var urlstr = '/addwatchlist/?uuid=' + uuid;
+		$(this).attr('src', '/static/images/cancel.png');
+		$(this).attr('class', 'removewatchlist');
+		$.ajax({
+			url : urlstr, 
+			    data : {},
+			    dataType : 'json', 
+			    type: 'GET', 
+		    });
+	    });
+
+        $(".removewatchlist").click(function(event) {
+		var uuid = $(this).parent().attr('id');
+		var urlstr = '/removewatchlist/?uuid=' + uuid;
+		$(this).attr('src', '/static/images/add.png');
+		$(this).attr('class', 'addwatchlist');
+		$.ajax({
+			url : urlstr, 
+			    data : {},
+			    dataType : 'json', 
+			    type: 'GET', 
+		    });
+	    });
+
+	
+
     });

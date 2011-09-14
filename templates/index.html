@@ -9,7 +9,6 @@
     <script src="/static/js/ui/testresize.js"></script>
     <script src="/static/js/ticktest.js"></script>
     <script src="/static/js/tickp.js"></script>
-    <script src="/static/js/stats.js"></script>
 
   </head>
   <body>
@@ -68,13 +67,17 @@
 		{% for h in dbtrends %}
 
 		<p id='{{h['uuid']}}'>
-		  <img src='/static/images/remove-button.gif' width='10' height='10' style='margin-left:1px; margin-right:3px' class='remove_trend'/>
+		  <img src='/static/images/icons/cross.png' width='14' height='14' style="vertical-align: text-top;" class='remove_trend'/>
 		  <span class="label labelcolor1">{{h['date']}} {{h['symbol']}}</span>
-		  <span class="trend">{{h['trendtype']}} trend discovered</span>
+		  <span class="trend" id='trend{{h['uuid']}}'>{{h['trendtype']}} trend discovered</span>
 		  <a href='/full/?uuid={{h["uuid"]}}' target='_blank'>
-		    <img src='/static/images/enlarge-button.gif' width='10' height='10' style='margin-left:1px;' border='0'>
+		    <img src='/static/images/zoom_in.png' width='14' height='14' style='margin-left:1px; vertical-align: middle' border='0'>
 		  </a>
-		  <img src='/static/images/add-button.gif' width='10' height='10' style='margin-left:5px' border='0'>
+		  {% if h['watch'] %}
+		  <img src='/static/images/cancel.png' width='13' height='13' style='margin-left:1px; vertical-align: text-top' class="removewatchlist">
+		  {% else %}
+		  <img src='/static/images/add.png' width='14' height='14' style='margin-left:1px; vertical-align: text-top' class="addwatchlist">
+		  {% end %}
 		</p>
 
 		{% end %}
@@ -96,7 +99,8 @@
 	      </div>
 -->
 	      <div class="add-buttons">
-		<div class="add-button" id="start-simulation">+ Watch List</div>
+		<div class="add-button" id="start-simulation"><a href="/">Trends</a></div>
+		<div class="add-button" id="start-simulation"><a href="/watchlist/">Watch List</a></div>
 	      </div>
 	    </div>
 

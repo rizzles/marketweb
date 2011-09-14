@@ -98,6 +98,9 @@ class Application(tornado.web.Application):
             (r"/trend/", TrendHandler),
             (r"/removetrend/", RemoveTrendHandler),
             (r"/full/", FullHandler),
+            (r"/addwatchlist/", AddWatchListHandler),
+            (r"/watchlist/", WatchListHandler),
+            (r"/removewatchlist/", RemoveWatchListHandler),
 
             (r"/ws/", EchoWebSocket),
             (r"/pika/", PikaSocket),
@@ -146,7 +149,7 @@ class MainHandler(BaseHandler):
             temp['symbol'] = trend['symbol']
             temp['trendtype'] = trend['type']
             temp['uuid'] = trend['uuid']
-            
+            temp['watch'] = trend['watch']
             dbtrends.append(temp)
 
         self.render("index.html", symbols=symbols, dbtrends=dbtrends)
@@ -166,6 +169,36 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
             pass
 
 
+class WatchListHandler(BaseHandler):
+    def get(self):
+        trends = db.query("""SELECT * FROM watchlist.trends ORDER BY id desc""")
+
+        for trend in trends:
+            date = datetime.fromtimestamp(int(trend['date']))
+            date = date-timedelta(hours=5)
+            trend['date'] = date.strftime("%Y-%m-%d %I:%M:%S")            
+
+        self.render('watchlist.html', trends=trends)
+
+
+class AddWatchListHandler(BaseHandler):
+    def get(self):
+        uuid = self.get_argument("uuid", None)
+
+        test = db.query("""SELECT * FROM watchlist.trends WHERE uuid = %s""", uuid)
+        if not test:
+            trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
+            db.execute("""UPDATE trends.trends SET watch = 1 WHERE uuid = %s""", uuid)
+            db.execute("""INSERT INTO watchlist.trends(uuid, date, symbol, type) VALUES (%s, %s, %s, %s)""", trend['uuid'], trend['date'], trend['symbol'], trend['type'])
+
+
+class RemoveWatchListHandler(BaseHandler):
+    def get(self):
+        uuid = self.get_argument("uuid", None)
+        db.execute("""DELETE FROM watchlist.trends WHERE uuid = %s""", uuid)
+        db.execute("""UPDATE trends.trends SET watch = 0 WHERE uuid = %s""", uuid)        
+
+
 class RemoveTrendHandler(BaseHandler):
     def get(self):
         uuid = self.get_argument("uuid", None)
@@ -175,10 +208,9 @@ class RemoveTrendHandler(BaseHandler):
 class TrendHandler(BaseHandler):
     def get(self):
         uuid = self.get_argument("uuid", None)
+        if uuid.startswith('trend'):
+            uuid = uuid[5:]
         trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
-        
-        # zoomed in version
-#        ticks = db.query("""SELECT date,open,close,high,low,id from %s where date >= %s order by date"""% (trend['symbol'], int(trend['startdate']-200000)))
         ticks = db.query("""SELECT date,open,close,high,low,id from %s"""% (trend['symbol']))
 
         p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
@@ -281,7 +313,7 @@ class FeedHandler(BaseHandler):
         symbol = symbol.replace(' thirty min', '_thirty')
         symbol = symbol.replace(' sixty min', '_sixty')
         symbol = symbol.replace(' daily', '_daily')
-        
+
         ticks = db.query("""SELECT date,open,close,high,low,id from %s order by date"""% symbol)
         hold = []
         
