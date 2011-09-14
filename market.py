@@ -102,6 +102,7 @@ class Application(tornado.web.Application):
             (r"/watchlist/", WatchListHandler),
             (r"/removewatchlist/", RemoveWatchListHandler),
             (r"/login/", LoginHandler),
+            (r"/logout/", LogoutHandler),
 
             (r"/ws/", EchoWebSocket),
             (r"/pika/", PikaSocket),
@@ -136,12 +137,18 @@ class LoginHandler(BaseHandler):
                    '</form></body></html>')
 
     def post(self):
-        password = self.get_argument("password")
+        password = self.get_argument("password", None)
         if password == 'getaclew':
             self.set_secure_cookie("clew", password)
             self.redirect("/")
         else:
             self.redirect("/")
+
+class LogoutHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        self.clear_cookie("clew")
+        self.redirect("/")        
 
 
 class MainHandler(BaseHandler):

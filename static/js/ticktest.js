@@ -16,6 +16,7 @@ $(document).ready(function() {
 
 	// ajax request for chart data for trend
 	var gettrend = function(uuid) {
+		$('input[type=radio]').attr('checked', false);
 	        var uuid = $(this).attr('id');
 		var urlstr = '/trend/?uuid=' + uuid;
 		//plot.plotempty();
