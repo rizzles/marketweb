@@ -101,18 +101,18 @@ class Application(tornado.web.Application):
             (r"/addwatchlist/", AddWatchListHandler),
             (r"/watchlist/", WatchListHandler),
             (r"/removewatchlist/", RemoveWatchListHandler),
+            (r"/login/", LoginHandler),
 
             (r"/ws/", EchoWebSocket),
             (r"/pika/", PikaSocket),
             (r"/pikareceive/", PikaReceive),
             ]
         settings = dict(
-            cookie_secret="43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
-            login_url="/",
+            login_url="/login/",
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            site_name='chundle',
-            xsrf_cookies=True,
+            site_name='clewchart',
+            cookie_secret="61oETz9XQAGdYdkb5JEmGeJJFuYh7EQnp2XdTPio/Vo=",
         )
         tornado.web.Application.__init__(self, handlers, **settings)
 
@@ -124,8 +124,28 @@ class BaseHandler(tornado.web.RequestHandler):
     def db(self):
         return self.db
 
+    def get_current_user(self):
+        return self.get_secure_cookie("clew")
+
+
+class LoginHandler(BaseHandler):
+    def get(self):
+        self.write('<html><body><form action="/login/" method="post">'
+                   'Password: <input type="password" name="password">'
+                   '<input type="submit" value="Sign in">'
+                   '</form></body></html>')
+
+    def post(self):
+        password = self.get_argument("password")
+        if password == 'getaclew':
+            self.set_secure_cookie("clew", password)
+            self.redirect("/")
+        else:
+            self.redirect("/")
+
 
 class MainHandler(BaseHandler):
+    @tornado.web.authenticated
     def get(self):
         ticks = db.query("SHOW TABLES")
         trends = db.query("SELECT * FROM trends.trends ORDER BY created desc")
@@ -171,6 +191,7 @@ class EchoWebSocket(tornado.websocket.WebSocketHandler):
 
 
 class WatchListHandler(BaseHandler):
+    @tornado.web.authenticated
     def get(self):
         trends = db.query("""SELECT * FROM watchlist.trends ORDER BY id desc""")
 
@@ -212,11 +233,12 @@ class TrendHandler(BaseHandler):
         if uuid.startswith('trend'):
             uuid = uuid[5:]
         trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
+
         if trend['symbol'][2:3] == "U":
             table = list(trend['symbol'])
             table[2] = 'Z'
             symbol = "".join(table)
-        trend['symbol'] = symbol
+            trend['symbol'] = symbol
 
         ticks = db.query("""SELECT date,open,close,high,low,id from %s"""% (trend['symbol']))
 
@@ -303,6 +325,7 @@ class TrendHandler(BaseHandler):
 
 
 class FullHandler(BaseHandler):
+    @tornado.web.authenticated
     def get(self):
         uuid = self.get_argument("uuid", None)
 
