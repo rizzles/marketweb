@@ -8,3 +8,9 @@ Websocket real time updates from rabbitmq/pika.
 2. Added line in to keep trendlines on screen when scrolling through ticks.
 3. Should display date at bottom of chart if it is a new day
 4. Started to add watch list buttons
+
+9-13-11
+--------------------
+1. Finished all buttons, etc for watchlist
+2. Worked daily chart in
+3. Have everything working with the with the new contract names
