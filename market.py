@@ -137,6 +137,7 @@ class MainHandler(BaseHandler):
             symbol = symbol.replace("_ten", " ten min") 
             symbol = symbol.replace("_thirty", " thirty min") 
             symbol = symbol.replace("_sixty", " sixty min") 
+            symbol = symbol.replace("_daily", " daily") 
             symbols.append(symbol)
 
         for trend in trends:
@@ -211,6 +212,12 @@ class TrendHandler(BaseHandler):
         if uuid.startswith('trend'):
             uuid = uuid[5:]
         trend = db.get("""SELECT * FROM trends.trends WHERE uuid = %s""", uuid)
+        if trend['symbol'][2:3] == "U":
+            table = list(trend['symbol'])
+            table[2] = 'Z'
+            symbol = "".join(table)
+        trend['symbol'] = symbol
+
         ticks = db.query("""SELECT date,open,close,high,low,id from %s"""% (trend['symbol']))
 
         p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
@@ -314,6 +321,7 @@ class FeedHandler(BaseHandler):
         symbol = symbol.replace(' sixty min', '_sixty')
         symbol = symbol.replace(' daily', '_daily')
 
+            
         ticks = db.query("""SELECT date,open,close,high,low,id from %s order by date"""% symbol)
         hold = []
         
