@@ -114,6 +114,7 @@ class Application(tornado.web.Application):
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             site_name='clewchart',
             cookie_secret="61oETz9XQAGdYdkb5JEmGeJJFuYh7EQnp2XdTPio/Vo=",
+            debug= True,
         )
         tornado.web.Application.__init__(self, handlers, **settings)
 
@@ -247,7 +248,8 @@ class TrendHandler(BaseHandler):
             symbol = "".join(table)
             trend['symbol'] = symbol
 
-        ticks = db.query("""SELECT date,open,close,high,low,id from %s"""% (trend['symbol']))
+        print trend['symbol']
+        ticks = db.query("""SELECT date,open,close,high,low,id from ticks.%s order by date"""% (trend['symbol']))
 
         p1 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p1']))
         p2 = db.get("""SELECT * FROM %s WHERE date = %s"""% (trend['symbol'], trend['p2']))
@@ -352,7 +354,7 @@ class FeedHandler(BaseHandler):
         symbol = symbol.replace(' daily', '_daily')
 
             
-        ticks = db.query("""SELECT date,open,close,high,low,id from %s order by date"""% symbol)
+        ticks = db.query("""SELECT date,open,close,high,low,id from ticks.%s order by date"""% symbol)
         hold = []
         
         for tick in ticks:
